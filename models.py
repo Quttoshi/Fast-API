@@ -26,3 +26,12 @@ class ProductResponse(BaseModel):
     price: float
     description: str
     quantity: int
+
+class JokeResponse(BaseModel):
+    type: str
+    setup: str
+    punchline: str
+    id: int
+    setup: str
+    punchline: str
+    id: int

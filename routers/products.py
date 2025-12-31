@@ -9,12 +9,13 @@ products_db: List[Product] = [
     Product(id=2, name="Smartphone", price=499.99, description="A latest model smartphone", quantity=25)
 ]
 
-async def validate_pagination(skip: int = Query(...), limit: int = Query(...)) -> dict:
+async def validate_pagination(skip: int = Query(0, ge=0), limit: int = Query(10, ge=1, le=100)) -> dict:
+    """Validate pagination parameters with defaults"""
     return {"skip": skip, "limit": limit}
 
 
 @router.get("")  
-async def list_products(pagination: dict = Depends(...)) -> List[Product]:
+async def list_products(pagination: dict = Depends(validate_pagination)) -> List[Product]:
     skip = pagination["skip"]
     limit = pagination["limit"]
     return products_db[skip : skip + limit]
@@ -77,3 +78,12 @@ async def delete_product(product_id: int) -> None:
     
     return None
 
+@router.get("/jokes/random")
+async def get_random_joke():
+    """Fetch a random joke from external API"""
+    async with httpx.AsyncClient() as client:
+        response = await client.get("https://official-joke-api.appspot.com/random_joke")
+        if response.status_code == 200:
+            return response.json()
+        else:
+            raise HTTPException(status_code=503, detail="External API failed")
